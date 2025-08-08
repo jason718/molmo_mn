@@ -13,6 +13,7 @@ from torch.optim.optimizer import Optimizer as OptimizerBase
 from .config import OptimizerType, SchedulerConfig, SchedulerType, TrainConfig
 from .model import Molmo
 from .torch_util import get_default_device, is_distributed, listinstr
+from .muon import Muon
 
 try:
     from megablocks.layers.mlp import MLP, SparseMLP
@@ -25,6 +26,7 @@ __all__ = [
     "Optimizer",
     "LionW",
     "AdamW",
+    "Muon",
     "Scheduler",
     "CosWithWarmup",
     "LinearWithWarmup",
@@ -1038,6 +1040,25 @@ def build_optimizer(cfg: TrainConfig, model: nn.Module) -> Optimizer:
             betas=cfg.optimizer.betas,
             weight_decay=cfg.optimizer.weight_decay,
             eps=cfg.optimizer.eps,
+        )
+    elif cfg.optimizer.name == OptimizerType.muon:
+        muon_params = [
+            p
+            for name, p in param_groups
+            if p.ndim >= 2 and "embed_tokens" not in name and "lm_head" not in name
+        ]
+        adamw_params = [
+            p
+            for name, p in param_groups
+            if not (
+                p.ndim >= 2 and "embed_tokens" not in name and "lm_head" not in name
+            )
+        ]
+        return Muon(
+            lr=cfg.optimizer.learning_rate,
+            wd=cfg.optimizer.weight_decay,
+            muon_params=muon_params,
+            adamw_params=adamw_params,
         )
     else:
         raise NotImplementedError
