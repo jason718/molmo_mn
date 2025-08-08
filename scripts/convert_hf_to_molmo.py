@@ -2,8 +2,12 @@ import argparse
 import logging
 import math
 import os
+import sys
 from pathlib import Path
 from typing import Dict, Any
+
+# Add the parent directory to the Python path to find launch_scripts
+sys.path.append(str(Path(__file__).parent.parent))
 
 import torch
 import einops

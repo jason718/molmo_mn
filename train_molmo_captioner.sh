@@ -6,7 +6,8 @@ SCRIPT_NAME=train_captioner
 MIXTURE=pixmo_cap_with_transcripts
 NUM_GPUS=8
 CURRENT_DATE_TIME=$(date +"%m-%d-%H-%M-%S")
-BEAKER_IMAGE="sanghol/molmo2-torch2.7.1-cuda12.8" #"rohunt/molmo-torch2.7.0-cuda12.8-video-v3" #  "chrisc/molmo-torch2.6.0-cuda12.4"
+# BEAKER_IMAGE="sanghol/molmo2-torch2.7.1-cuda12.8" #"rohunt/molmo-torch2.7.0-cuda12.8-video-v3" #  "chrisc/molmo-torch2.6.0-cuda12.4"
+BEAKER_IMAGE="01K24G5CS5RGPGK3VT043MJ5BX"
 PRIORITY="high"
 CLUSTER=ai2/jupiter-cirrascale-2
 CLUSTER2=ai2/ceres-cirrascale # 
@@ -44,7 +45,8 @@ gantry run \
   --env-secret OPENAI_API_KEY=JASONR_OPENAI_API_KEY \
   --no-python \
   --venv base \
-  -- /bin/bash -c "MOLMO_DATA_DIR=${DATA_DIR} torchrun -m --nproc-per-node ${NUM_GPUS} \
+  -- /bin/bash -c "WANDB_ENTITY=prior-ai2 WANDB_PROJECT=jasonr_exps DATA_DIR=${DATA_DIR} MOLMO_DATA_DIR=${DATA_DIR} \
+    torchrun -m --nproc-per-node ${NUM_GPUS} \
     launch_scripts.${SCRIPT_NAME} ${LLM} \
     --dataset ${MIXTURE} \
     --vision_backbone ${VISION_BACKBONE} \
